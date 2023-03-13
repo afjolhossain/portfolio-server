@@ -11,13 +11,6 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.hvuwn.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
-// console.log(uri);
-// const client = new MongoClient(uri, {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// });
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.hvuwn.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -30,6 +23,7 @@ async function run() {
     client.connect();
     const database = client.db("Portfolio");
     const projectsCollection = database.collection("projects");
+    const messageCollection = database.collection("message");
 
     // GET API
     app.get("/projects", async (req, res) => {
@@ -44,6 +38,13 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const product = await projectsCollection.findOne(query);
       res.send(product);
+    });
+
+    //  API Post
+    app.post("/message", async (req, res) => {
+      const message = req.body;
+      const result = await messageCollection.insertOne(message);
+      res.send(result);
     });
   } finally {
     //   await client.close();
